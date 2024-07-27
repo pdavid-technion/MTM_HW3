@@ -53,7 +53,7 @@ namespace mtm {
 
        class ConstIterator;
        
-        void Insert(T t) {
+        void insert(T t) {
             node<T>* newNode = new node<T>;
             newNode->next = NULL;
             newNode->prev = NULL;
@@ -87,7 +87,7 @@ namespace mtm {
             return ConstIterator(this,NULL);
         }
 
-        void Remove(ConstIterator& i) {
+        void remove(ConstIterator& i) {
             if(i.currNode == NULL) {
                 return;
             }
@@ -123,7 +123,7 @@ namespace mtm {
             return;
         }
 
-        int Length() {
+        int length() {
             int result = 0;
             for(ConstIterator it = this->begin(); it != this->end() ; ++it) {
                 result++;
@@ -133,7 +133,7 @@ namespace mtm {
 
         SortedList<T>(const SortedList& s) : head(NULL), tail(NULL) {
             for(ConstIterator it = s.begin(); it != s.end() ; ++it) {
-                this->Insert(*it);
+                this->insert(*it);
             }
         }
 
@@ -147,12 +147,12 @@ namespace mtm {
             {
                 temp = it;
                 ++it;
-                this->Remove(temp);
+                this->remove(temp);
             }
             it = s.begin();
             while(it != s.end())
             {
-                this->Insert(it.currNode->value);
+                this->insert(it.currNode->value);
                 ++it;
             }
             return *this;
@@ -165,7 +165,7 @@ namespace mtm {
             {
                 temp = it;
                 ++it;
-                this->Remove(temp);
+                this->remove(temp);
             }
         }
 
@@ -173,7 +173,7 @@ namespace mtm {
             SortedList<T> *newList = new SortedList<T>;
             for(ConstIterator it = this->begin(); it != this->end() ; ++it) {
                 if(func(*it)) {
-                    newList->Insert(*it);
+                    newList->insert(*it);
                 }
             }
             return *newList;
@@ -182,7 +182,7 @@ namespace mtm {
         SortedList<T>& apply(T (*func)(T)) {
             SortedList<T> *newList = new SortedList<T>;
             for(ConstIterator it = this->begin(); it != this->end() ; ++it) {
-                newList->Insert(func(*it));
+                newList->insert(func(*it));
             }
             return *newList;
         }
