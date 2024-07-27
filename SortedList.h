@@ -18,6 +18,7 @@ namespace mtm {
     public:
         node<T>* head;
         node<T>* tail;
+        
         SortedList<T>() {
             head = NULL;
             tail = NULL;
@@ -30,6 +31,7 @@ namespace mtm {
             newNode->next = NULL;
             newNode->prev = NULL;
             newNode->value = t;
+            
             node<T>* currNode = head;
             node<T>* currPrev = NULL;
             while(currNode && currNode->value < t) {
@@ -52,10 +54,11 @@ namespace mtm {
             }
         }
 
-        ConstIterator  begin() const{
+        ConstIterator begin() const {
             return ConstIterator(this,head);
         }
-        ConstIterator end() const{
+
+        ConstIterator end() const {
             return ConstIterator(this,NULL);
         }
 
@@ -109,6 +112,7 @@ namespace mtm {
                 currNode = currNode->next;                
             }
         }
+
         SortedList<T>& operator=(const SortedList& s) {
             if(this == &s) {
                 return *this;
@@ -125,6 +129,7 @@ namespace mtm {
             }
             return *this;
         }
+
         ~SortedList() {
             node<T>* currNode = head; 
             node<T>* nextNode; 
@@ -168,17 +173,23 @@ namespace mtm {
     public:
         const SortedList<T>* list;
         const node<T>* currNode;
+
         ConstIterator(const SortedList<T>* list, const node<T>* currNode) : list(list), currNode(currNode) {}
         ~ConstIterator()=default;
         ConstIterator(const ConstIterator&)=default;
         ConstIterator& operator=(const ConstIterator&)=default;
+        
         ConstIterator& operator++() {
             currNode = currNode->next;
             return *this;
         }
+
+
+        // TODO - SHELLY - Fix to check if they point to the same cell and not if they contain the same values
         bool operator!=(const ConstIterator& other) {
             return (this->currNode->value != other.value);
         }
+
         const T& operator*() const {
             return this->currNode->value;
         }
