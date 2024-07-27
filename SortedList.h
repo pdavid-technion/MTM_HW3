@@ -6,8 +6,137 @@
 namespace mtm {
 
     template <typename T>
+    struct node {
+        node<T>* prev;
+        node<T>* next;
+        T value;
+    };
+    
+
+    template <typename T>
     class SortedList {
     public:
+        node<T>* head;
+        node<T>* tail;
+        SortedList<T>() {
+            head = NULL;
+            tail = NULL;
+        }
+
+       class ConstIterator;
+       
+        void Insert(T t) {
+            node<T>* newNode = new node<T>;
+            newNode->next = NULL;
+            newNode->prev = NULL;
+            newNode->value = t;
+            node<T>* currNode = head;
+            node<T>* currPrev = NULL;
+            while(currNode && currNode->value < t) {
+                    currPrev = currNode;
+                    currNode = currNode->next;
+            }
+            if(currPrev) {
+                currPrev->next = newNode;
+                newNode->prev = currPrev;
+            }
+            if(currNode) {
+                newNode->next = currNode;
+                currNode->prev = newNode;
+            }
+            if(newNode->prev == NULL) {
+                head = newNode;
+            }
+            if(newNode->next == NULL) {
+                tail = newNode;
+            }
+        }
+
+        ConstIterator  begin() const{
+            return ConstIterator(this,head);
+        }
+        ConstIterator end() const{
+            return ConstIterator(this,NULL);
+        }
+
+        void Remove(ConstIterator& i) {
+            if(i.currNode == NULL) {
+                return;
+            }
+
+            const node<T>* curr = i.currNode;
+            node<T>* prev = i.currNode->prev;
+            node<T>* next = i.currNode->next;
+            
+            if(prev) {
+                prev->next = next;
+            }
+            if(next) {
+                next->prev = prev;
+            }
+            if(next && next->prev == NULL) {
+                this->head = next;
+            }
+            if(next && next->next == NULL) {
+                this->tail = next;
+            }
+            if(prev && prev->prev == NULL) {
+                this->head = prev;
+            }
+            if(prev && prev->next == NULL) {
+                this->tail = prev;
+            }
+            delete curr;
+            i.currNode = NULL;
+            return;
+        }
+
+        int Length() {
+            int result = 0;
+            node<T>* currNode = head;
+            while(currNode)
+            {
+                result++;
+                currNode = currNode->next;
+            }
+            return result;
+        }
+
+        SortedList<T>(const SortedList& s) : head(NULL), tail(NULL) {
+            node<T>* currNode = s.head; 
+            while(currNode) {
+                this->Insert(currNode->value);
+                currNode = currNode->next;                
+            }
+        }
+        SortedList<T>& operator=(const SortedList& s) {
+            if(this == &s) {
+                return *this;
+            }
+            node<T>* currNode = s.head; 
+            node<T>* currNext; 
+            T temp;
+            while(currNode) {
+                temp = currNode->value;
+                currNext = currNode->next;
+                delete currNode;
+                this->Insert(temp);
+                currNode = currNext;                
+            }
+            return *this;
+        }
+        ~SortedList() {
+            node<T>* currNode = head; 
+            node<T>* nextNode; 
+            while(currNode) {
+                nextNode = currNode->next;
+                delete currNode;
+                currNode = nextNode;                
+            }
+        }
+
+        
+        
         /**
          *
          * the class should support the following public interface:
@@ -36,6 +165,25 @@ namespace mtm {
 
     template <class T>
     class SortedList<T>::ConstIterator {
+    public:
+        const SortedList<T>* list;
+        const node<T>* currNode;
+        ConstIterator(const SortedList<T>* list, const node<T>* currNode) : list(list), currNode(currNode) {}
+        ~ConstIterator()=default;
+        ConstIterator(const ConstIterator&)=default;
+        ConstIterator& operator=(const ConstIterator&)=default;
+        ConstIterator& operator++() {
+            currNode = currNode->next;
+            return *this;
+        }
+        bool operator!=(const ConstIterator& other) {
+            return (this->currNode->value != other.value);
+        }
+        const T& operator*() const {
+            return this->currNode->value;
+        }
+
+        friend SortedList<T>;
     /**
      * the class should support the following public interface:
      * if needed, use =defualt / =delete
@@ -52,6 +200,8 @@ namespace mtm {
      * 7. operator!= - returns true if the iterator points to a different element
      *
      */
+
+
     };
 }
 
