@@ -26,6 +26,14 @@ private:
      */
     int nextTaskId;
 
+/**
+     * @brief Assigns the current Id and advances the field keeping it
+     */
+    int assignTaskId();
+    void unassignTaskId();
+
+    Person& findEmployee(string& employeeName);
+
 public:
     /**
      * @brief Default constructor to create a TaskManager object.
