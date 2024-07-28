@@ -30,6 +30,11 @@ Person &TaskManager::findEmployee(string &employeeName)
             return &currentEmployee;
         }
     }
+}
+
+Person &TaskManager::findOrCreateEmployee(string &employeeName)
+{
+    return this.findEmployee(employeeName);
 
     if (this->nextTaskId >= MAX_PERSONS)
     {
@@ -61,6 +66,25 @@ void TaskManager::assignTask(const string &personName, const Task &task)
     catch (...)
     {
         this.unassignTaskId();
+        throw;
+    }
+}
+
+void TaskManager::completeTask(const string &personName)
+{
+    Person employeeToCompleteFor = this->findEmployee(personName);
+
+    if (employeeToCompleteFor == nullptr)
+    {
+        return;
+    }
+
+    try
+    {
+        employeeToCompleteFor.completeTask();
+    }
+    catch ()
+    {
         throw;
     }
 }

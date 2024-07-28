@@ -32,6 +32,7 @@ private:
     int assignTaskId();
     void unassignTaskId();
 
+    Person& findOrCreateEmployee(string& employeeName);
     Person& findEmployee(string& employeeName);
 
 public:
