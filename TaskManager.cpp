@@ -145,28 +145,64 @@ void TaskManager::bumpPriorityByType(TaskType type, int priority)
     }
 }
 
-void TaskManager::printAllEmployees() const {
+void TaskManager::printAllEmployees() const
+{
 
-    for( int i = 0; i < MAX_PERSONS; i++ ){
-        if(this->employeesList[i] != nullptr ){
+    for (int i = 0; i < MAX_PERSONS; i++)
+    {
+        if (this->employeesList[i] != nullptr)
+        {
             cout << employeesList[i] << endl;
         }
     }
 }
 
-void TaskManager::printAllTasks() const {
+void TaskManager::printAllTasks() const
+{
 
     SortedList<Task> allTasks = new SortedList<Task>();
 
-    for(int i = 0; i < MAX_PERSONS; i++){
-        if(this.employeesList[i] != nullptr ){
-            for(Task& currentTask: this.employeesList[i].getTasks()){
+    for (int i = 0; i < MAX_PERSONS; i++)
+    {
+        if (this.employeesList[i] != nullptr)
+        {
+            for (Task &currentTask : this.employeesList[i].getTasks())
+            {
                 allTasks.insert(currentTask);
             }
         }
     }
 
-    for(Task& taskToPrint: allTasks){
+    for (Task &taskToPrint : allTasks)
+    {
+        cout << taskToPrint << endl;
+    }
+
+    delete allTasks;
+}
+
+void TaskManager::printTasksByType(TaskType type) const
+{
+    SortedList<Task> allTasks = new SortedList<Task>();
+
+    for (int i = 0; i < MAX_PERSONS; i++)
+    {
+        if (this.employeesList[i] != nullptr)
+        {
+            SortedList<Task> filteredTasks = this.employeesList[i].getTasks()
+            .filter([type](const Task &task) { return task.getType() == type; });
+            
+            for (Task &currentTask : filteredTasks)
+            {
+                allTasks.insert(currentTask);
+            }
+
+            delete filteredTasks;
+        }
+    }
+
+    for (Task &taskToPrint : allTasks)
+    {
         cout << taskToPrint << endl;
     }
 
