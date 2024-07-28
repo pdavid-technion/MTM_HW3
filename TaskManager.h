@@ -19,7 +19,7 @@ private:
      /**
      * @brief List of employees the manager handles
      */
-    Person* employeesList[MAX_PERSONS];
+    Person* employeesList[MAX_PERSONS] = {nullptr};
 
     int employeesCount;
     /**

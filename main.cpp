@@ -180,6 +180,7 @@ bool testListBasic()
     {
         if ((*it_copy != *it_list) || (&(*it_copy) == &(*it_list)))
             return false;
+        
         ++it_copy;
         ++it_list;
     }
@@ -380,7 +381,7 @@ bool testTaskManager()
     tm.assignTask("Alice", task3);
     tm.assignTask("Charlie", task4);
     tm.assignTask("Bob", task5);
-
+    
     tm.printAllEmployees();
     cout << endl;
 
