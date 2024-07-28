@@ -122,7 +122,8 @@ namespace mtm
         {
             if (iteratorToRemoveFrom.currentNode == nullptr)
             {
-                return;
+                throw std::invalid_argument();
+
             }
 
             const node<T> *nodeToRemove = iteratorToRemoveFrom.currentNode;
@@ -199,7 +200,8 @@ namespace mtm
             }
             catch (...)
             {
-                // DAVID - Handle Exceptions
+                throw std::bad_alloc();
+
             }
             return *this;
         }
@@ -275,6 +277,10 @@ namespace mtm
 
         ConstIterator &operator++()
         {
+	        if(currentNode->next == nullptr)
+            {
+                throw std::out_of_range();
+            }
             currentNode = currentNode->next;
             return *this;
         }
@@ -293,3 +299,4 @@ namespace mtm
         friend SortedList<T>;
     };
 }
+
