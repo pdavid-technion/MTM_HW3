@@ -37,12 +37,12 @@ Person* TaskManager::findEmployee(const string &employeeName)
     return nullptr;
 }
 
-Person& TaskManager::findOrCreateEmployee(const string &employeeName)
+Person* TaskManager::findOrCreateEmployee(const string &employeeName)
 {
     Person* employeeToFind = this->findEmployee(employeeName);
     
     if( employeeToFind != nullptr ){
-        return *employeeToFind;
+        return employeeToFind;
     }
 
     if (this->employeesCount >= MAX_PERSONS)
@@ -55,7 +55,7 @@ Person& TaskManager::findOrCreateEmployee(const string &employeeName)
         Person *employeeToAdd = new Person(employeeName);
         this->employeesList[this->employeesCount] = employeeToAdd;
         this->employeesCount++;
-        return *employeeToAdd;
+        return employeeToAdd;
     }
     catch (...)
     {
@@ -68,12 +68,10 @@ void TaskManager::assignTask(const string &personName, const Task &task)
     try
     {
         int taskId = this->assignTaskId();
-        Person employeeToAssign = this->findOrCreateEmployee(personName);
+        Person* employeeToAssign = this->findOrCreateEmployee(personName);
         Task taskToAssign(task.getPriority(), task.getType(), task.getDescription());
         taskToAssign.setId(taskId);
-        employeeToAssign.assignTask(taskToAssign);
-
-  
+        employeeToAssign->assignTask(taskToAssign);
     }
     catch (...)
     {
