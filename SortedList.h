@@ -275,7 +275,7 @@ namespace mtm
 
         ConstIterator &operator++()
         {
-            if(currentNode->next == nullptr)
+	        if(currentNode->next == nullptr)
             {
                 throw std::out_of_range();
             }
