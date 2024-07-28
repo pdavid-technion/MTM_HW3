@@ -18,31 +18,8 @@ namespace mtm
     class SortedList
     {
 
-        /**
-         *
-         * the class should support the following public interface:
-         * if needed, use =defualt / =delete
-         *
-         * constructors and destructor:
-         * 1. SortedList() - creates an empty list.
-         * 2. copy constructor
-         * 3. operator= - assignment operator
-         * 4. ~SortedList() - destructor
-         *
-         * iterator:
-         * 5. class ConstIterator;
-         * 6. begin method
-         * 7. end method
-         *
-         * functions:
-         * 8. insert - inserts a new element to the list
-         * 9. remove - removes an element from the list
-         * 10. length - returns the number of elements in the list
-         * 11. filter - returns a new list with elements that satisfy a given condition
-         * 12. apply - returns a new list with elements that were modified by an operation
-         */
-
     private:
+
         node<T> *head;
         node<T> *tail;
 
@@ -70,7 +47,7 @@ namespace mtm
         class ConstIterator;
 
         // SHELLY - Apply this supports pointers
-        SortedList<T>& insert(T& valueToInsert)
+        SortedList<T> &insert(const T &valueToInsert)
         {
             node<T> *newNode = new node<T>;
             newNode->next = nullptr;
@@ -81,7 +58,7 @@ namespace mtm
             node<T> *currentPrev = nullptr;
 
             // TODO - SHELLY - Check this makes sense
-            while (currentNode && currentNode->value > valueToInsert)
+            while (currentNode && *(currentNode->value) > valueToInsert)
             {
                 currentPrev = currentNode;
                 currentNode = currentNode->next;
@@ -118,57 +95,58 @@ namespace mtm
             return ConstIterator(this, nullptr);
         }
 
-        SortedList<T>& remove(ConstIterator& iteratorToRemoveFrom)
-        {
-            if (iteratorToRemoveFrom.currentNode == nullptr)
+            SortedList<T> &remove(const ConstIterator& iteratorToRemoveFrom)
             {
-                throw std::invalid_argument();
+                if (iteratorToRemoveFrom.currentNode == nullptr)
+                {
+                    return *this;
+                }
 
+                const node<T> *nodeToRemove = iteratorToRemoveFrom.currentNode;
+                node<T> *prev = iteratorToRemoveFrom.currentNode->prev;
+                node<T> *next = iteratorToRemoveFrom.currentNode->next;
+
+                if (prev != nullptr)
+                {
+                    prev->next = next;
+                }
+                if (next != nullptr)
+                {
+                    next->prev = prev;
+                }
+                if (next != nullptr && next->prev == nullptr)
+                {
+                    this->head = next;
+                }
+                if (next != nullptr && next->next == nullptr)
+                {
+                    this->tail = next;
+                }
+                if (prev != nullptr && prev->prev == nullptr)
+                {
+                    this->head = prev;
+                }
+                if (prev != nullptr && prev->next == nullptr)
+                {
+                    this->tail = prev;
+                }
+                if (prev == nullptr && next == nullptr)
+                {
+                    this->head = nullptr;
+                    this->tail = nullptr;
+                }
+
+                delete nodeToRemove->value;
+                delete nodeToRemove;
+                //iteratorToRemoveFrom.currentNode = nullptr;
+                return *this;
             }
 
-            const node<T> *nodeToRemove = iteratorToRemoveFrom.currentNode;
-            node<T> *prev = iteratorToRemoveFrom.currentNode->prev;
-            node<T> *next = iteratorToRemoveFrom.currentNode->next;
-
-            if (prev != nullptr)
-            {
-                prev->next = next;
-            }
-            if (next != nullptr)
-            {
-                next->prev = prev;
-            }
-            if (next != nullptr && next->prev == nullptr)
-            {
-                this->head = next;
-            }
-            if (next != nullptr && next->next == nullptr)
-            {
-                this->tail = next;
-            }
-            if (prev != nullptr && prev->prev == nullptr)
-            {
-                this->head = prev;
-            }
-            if (prev != nullptr && prev->next == nullptr)
-            {
-                this->tail = prev;
-            }
-            if (prev == nullptr && next == nullptr)
-            {
-                this->head = nullptr;
-                this->tail = nullptr;
-            }
-            delete nodeToRemove;
-            iteratorToRemoveFrom.currentNode = nullptr;
-            return *this;
-        }
-
-        int length()
+        int length() const
         {
             int result = 0;
             // SHELLY - Use cleaner iterartion
-            for (T& currentValue : *this)
+            for (SortedList::ConstIterator it = this->begin(); it != this->end(); ++it)
             {
                 result++;
             }
@@ -178,14 +156,14 @@ namespace mtm
 
         SortedList<T>(const SortedList &listToCopy) : head(nullptr), tail(nullptr)
         {
-            for (T &currentNode : *listToCopy)
+            for (SortedList::ConstIterator it = listToCopy.begin(); it != listToCopy.end(); ++it)
             {
-                this->insert(currentNode);
+                this->insert(*it);
             }
         }
 
-        //SHELLY - Rewrite
-        SortedList<T>& operator=(const SortedList &listToAssign)
+        // SHELLY - Rewrite
+        SortedList<T> &operator=(const SortedList &listToAssign)
         {
             if (this == &listToAssign)
             {
@@ -194,14 +172,17 @@ namespace mtm
 
             try
             {
-                SortedList<T> newListToAssign = new SortedList<T>(listToAssign);
-                clear();
-                this = newListToAssign;
+                SortedList<T> tempList(listToAssign);
+                this->clear();
+                this->head = tempList.head;
+                this->tail = tempList.tail;
+
+                tempList.head = nullptr;
+                tempList.tail = nullptr;
             }
             catch (...)
             {
                 throw std::bad_alloc();
-
             }
             return *this;
         }
@@ -209,36 +190,36 @@ namespace mtm
         // SHELLY - Rewrite
         ~SortedList()
         {
-            clear();
+            this->clear();
         }
 
-        SortedList<T> &filter(bool (*filterFunction)(T))
-        {
-            SortedList<T> *newList = new SortedList<T>;
+        template <class Condition>
+        SortedList<T> filter(Condition filterCondition) const{
+            SortedList<T> newList;
 
             // SHELLY - Change to cleaner iteration
-            for (T &currentValue : *this)
+            for (const T &currentValue : *this)
             {
-                if (filterFunction(currentValue))
+                if (filterCondition(currentValue))
                 {
-                    newList->insert(&currentValue);
+                    newList.insert(currentValue);
                 }
             }
 
-            return *newList;
+            return newList;
         }
 
-        SortedList<T> &apply(T (*applyFunction)(T))
-        {
-            SortedList<T> *newList = new SortedList<T>;
+        template <class Operation>
+        SortedList<T> apply(Operation operationToApply) const{
+            SortedList<T> newList;
 
             // SHELLY - Change to cleaner iteration
-            for (T &currentValue : *this)
+            for (const T &currentValue : *this)
             {
-                newList->insert(applyFunction(currentValue));
+                newList.insert(operationToApply(currentValue));
             }
 
-            return *newList;
+            return newList;
         }
     };
 
@@ -246,40 +227,22 @@ namespace mtm
     class SortedList<T>::ConstIterator
     {
 
-        /**
-         * the class should support the following public interface:
-         * if needed, use =defualt / =delete
-         *
-         * constructors and destructor:
-         * 1. a ctor(or ctors) your implementation needs
-         * 2. copy constructor
-         * 3. operator= - assignment operator
-         * 4. ~ConstIterator() - destructor
-         *
-         * operators:
-         * 5. operator* - returns the element the iterator points to
-         * 6. operator++ - advances the iterator to the next element
-         * 7. operator!= - returns true if the iterator points to a different element
-         *
-         */
-
     private:
         const SortedList<T> *list;
         const node<T> *currentNode;
-
-        ConstIterator() : list(nullptr), currentNode(nullptr) {}
-        ConstIterator(const SortedList<T> *list, const node<T> *currentNode) : list(list), currentNode(currentNode) {}
-        ~ConstIterator() = default;
         ConstIterator(const ConstIterator &) = default;
 
     public:
+        ConstIterator() : list(nullptr), currentNode(nullptr) {}
+        ConstIterator(const SortedList<T> *list, const node<T> *currentNode) : list(list), currentNode(currentNode) {}
+        ~ConstIterator() = default;
         ConstIterator &operator=(const ConstIterator &) = default;
 
         ConstIterator &operator++()
         {
-	        if(currentNode->next == nullptr)
+            if (currentNode->next == nullptr)
             {
-                throw std::out_of_range();
+                throw std::out_of_range("You cannot advance yourself further the end of the list");
             }
             currentNode = currentNode->next;
             return *this;
@@ -293,10 +256,9 @@ namespace mtm
 
         const T &operator*() const
         {
-            return this->currentNode->value;
+            return *(this->currentNode->value);
         }
 
         friend SortedList<T>;
     };
 }
-

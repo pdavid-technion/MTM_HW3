@@ -1,7 +1,10 @@
-
 #pragma once
 
 #include "Task.h"
+#include "Person.h"
+#include "SortedList.h"
+
+using mtm::SortedList;
 
 /**
  * @brief Class managing tasks assigned to multiple persons.
@@ -13,7 +16,28 @@ private:
      */
     static const int MAX_PERSONS = 10;
 
-    // Note - Additional private fields and methods can be added if needed.
+     /**
+     * @brief List of employees the manager handles
+     */
+    Person* employeesList[MAX_PERSONS];
+
+    int employeesCount;
+    /**
+     * @brief The next Id to be allocated to a task
+     */
+    int nextTaskId;
+
+/**
+     * @brief Assigns the current Id and advances the field keeping it
+     */
+    int assignTaskId();
+    void unassignTaskId();
+
+    Person& findOrCreateEmployee(const string& employeeName);
+    Person* findEmployee(const string& employeeName);
+
+    bool filterByType(const Task& task, TaskType type);
+    bool filterByNotType(const Task& task, TaskType type);
 
 public:
     /**
