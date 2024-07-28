@@ -153,3 +153,22 @@ void TaskManager::printAllEmployees() const {
         }
     }
 }
+
+void TaskManager::printAllTasks() const {
+
+    SortedList<Task> allTasks = new SortedList<Task>();
+
+    for(int i = 0; i < MAX_PERSONS; i++){
+        if(this.employeesList[i] != nullptr ){
+            for(Task& currentTask: this.employeesList[i].getTasks()){
+                allTasks.insert(currentTask);
+            }
+        }
+    }
+
+    for(Task& taskToPrint: allTasks){
+        cout << taskToPrint << endl;
+    }
+
+    delete allTasks;
+}
