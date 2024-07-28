@@ -72,6 +72,8 @@ void TaskManager::assignTask(const string &personName, const Task &task)
         Task taskToAssign(task.getPriority(), task.getType(), task.getDescription());
         taskToAssign.setId(taskId);
         employeeToAssign.assignTask(taskToAssign);
+
+  
     }
     catch (...)
     {
@@ -167,7 +169,7 @@ void TaskManager::printAllEmployees() const
     {
         if (this->employeesList[i] != nullptr)
         {
-            cout << employeesList[i] << endl;
+            cout << *this->employeesList[i] << endl;
         }
     }
 }

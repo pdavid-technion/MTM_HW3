@@ -3,6 +3,9 @@
 #include <iostream>
 #include <stdexcept>
 
+
+using std::cout, std::endl;
+
 namespace mtm
 {
 
@@ -176,13 +179,13 @@ namespace mtm
                 this->clear();
                 this->head = tempList.head;
                 this->tail = tempList.tail;
-
+                
                 tempList.head = nullptr;
                 tempList.tail = nullptr;
             }
             catch (...)
             {
-                throw std::bad_alloc();
+                throw;// std::bad_alloc();
             }
             return *this;
         }
@@ -240,7 +243,7 @@ namespace mtm
 
         ConstIterator &operator++()
         {
-            if (currentNode->next == nullptr)
+            if (currentNode == nullptr)
             {
                 throw std::out_of_range("You cannot advance yourself further the end of the list");
             }
