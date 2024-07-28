@@ -88,3 +88,51 @@ void TaskManager::completeTask(const string &personName)
         throw;
     }
 }
+
+void TaskManager::bumpPriorityByType(TaskType type, int priority)
+{
+    if (priority <= 0)
+    {
+        return;
+    }
+
+    try
+    {
+        for (Person &currentEmployee : this->employeesList) {
+            
+            SortedList<Task> employeeTasks = currentEmployee.getTasks();
+            
+            SortedList<Task> tasksToBump = employeeTasks.filter([type](const Task &task) {
+                return task.getType() == type; }
+            );
+
+            SortedList<Task> tasksToKeep = employeeTasks.filter([type](const Task &task) {
+                return task.getType() != type; }
+            );
+
+            SortedList<Task> bumpedTasks = tasksToBump.apply([increment](const Task &task) {
+                            Task modifiedTask = task;
+                            modifiedTask.setPriority(task.getPriority() + priority);
+                            return modifiedTask; }
+            );
+
+            delete employeeTasks;
+            employeeTasks = new SortedList<Task>();
+
+            for(Task& regularTask: tasksToKeep){
+                employeeTasks.insert(regularTask);
+            }
+
+             for(Task& bumpedTask: bumpedTasks){
+                employeeTasks.insert(bumpedTask);
+            }
+
+            delete bumpedTasks, tasksToKeep, tasksToBump;
+            currentEmployee.setTasks(employeeTasks);
+        }
+    }
+    catch (...)
+    {
+        throw;
+    }
+}
