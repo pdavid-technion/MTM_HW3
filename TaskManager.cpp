@@ -1,12 +1,15 @@
+#include <iostream>
 #include "Task.h"
 #include "Person.h"
 #include "SortedList.h"
 #include "TaskManager.h"
 
+using std::cout, std::endl;
+
 TaskManager::TaskManager()
 {
     this->nextTaskId = 0;
-    this->employeesList = new SortedList<Person>();
+    int employeesCount = 0;
 }
 
 int TaskManager::assignTaskId()
@@ -23,11 +26,11 @@ void TaskManager::unassignTaskId()
 
 Person &TaskManager::findEmployee(string &employeeName)
 {
-    for (Person &currentEmployee : *this->employeesList)
+    for (int i = 0; i < MAX_PERSONS; i++)
     {
-        if (currentEmployee.getName() == employeeName)
+        if (employeesList[i] != nullptr && employeesList[i].getName() == employeeName)
         {
-            return &currentEmployee;
+            return &employeesList[i];
         }
     }
 }
@@ -36,7 +39,7 @@ Person &TaskManager::findOrCreateEmployee(string &employeeName)
 {
     return this.findEmployee(employeeName);
 
-    if (this->nextTaskId >= MAX_PERSONS)
+    if (this.employeesCount >= MAX_PERSONS)
     {
         throw std::runtime_error("You have passed the maximum capacity for employees");
     }
@@ -44,7 +47,8 @@ Person &TaskManager::findOrCreateEmployee(string &employeeName)
     try
     {
         Person employeeToAdd = new Person(employeeName);
-        this->employeesList.insert(employeeToAdd);
+        this->employeesList[this->employeesCount] = employeeToAdd;
+        this->employeesCount++;
         return &employeeToAdd;
     }
     catch (...)
@@ -98,41 +102,54 @@ void TaskManager::bumpPriorityByType(TaskType type, int priority)
 
     try
     {
-        for (Person &currentEmployee : this->employeesList) {
-            
-            SortedList<Task> employeeTasks = currentEmployee.getTasks();
-            
-            SortedList<Task> tasksToBump = employeeTasks.filter([type](const Task &task) {
-                return task.getType() == type; }
-            );
+        for (int i = 0; i < MAX_PERSONS; i++)
+        {
+            Person currentEmployee = this->employeesList[i];
+            if (currentEmployee != nullptr)
+            {
+                SortedList<Task> employeeTasks = currentEmployee.getTasks();
 
-            SortedList<Task> tasksToKeep = employeeTasks.filter([type](const Task &task) {
-                return task.getType() != type; }
-            );
+                SortedList<Task> tasksToBump = employeeTasks.filter([type](const Task &task)
+                                                                    { return task.getType() == type; });
 
-            SortedList<Task> bumpedTasks = tasksToBump.apply([increment](const Task &task) {
+                SortedList<Task> tasksToKeep = employeeTasks.filter([type](const Task &task)
+                                                                    { return task.getType() != type; });
+
+                SortedList<Task> bumpedTasks = tasksToBump.apply([increment](const Task &task)
+                                                                 {
                             Task modifiedTask = task;
                             modifiedTask.setPriority(task.getPriority() + priority);
-                            return modifiedTask; }
-            );
+                            return modifiedTask; });
 
-            delete employeeTasks;
-            employeeTasks = new SortedList<Task>();
+                delete employeeTasks;
+                employeeTasks = new SortedList<Task>();
 
-            for(Task& regularTask: tasksToKeep){
-                employeeTasks.insert(regularTask);
+                for (Task &regularTask : tasksToKeep)
+                {
+                    employeeTasks.insert(regularTask);
+                }
+
+                for (Task &bumpedTask : bumpedTasks)
+                {
+                    employeeTasks.insert(bumpedTask);
+                }
+
+                delete bumpedTasks, tasksToKeep, tasksToBump;
+                currentEmployee.setTasks(employeeTasks);
             }
-
-             for(Task& bumpedTask: bumpedTasks){
-                employeeTasks.insert(bumpedTask);
-            }
-
-            delete bumpedTasks, tasksToKeep, tasksToBump;
-            currentEmployee.setTasks(employeeTasks);
         }
     }
     catch (...)
     {
         throw;
+    }
+}
+
+void TaskManager::printAllEmployees() const {
+
+    for( int i = 0; i < MAX_PERSONS; i++ ){
+        if(this->employeesList[i] != nullptr ){
+            cout << employeesList[i] << endl;
+        }
     }
 }

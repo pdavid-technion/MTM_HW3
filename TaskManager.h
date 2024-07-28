@@ -19,8 +19,9 @@ private:
      /**
      * @brief List of employees the manager handles
      */
-    SortedList<Person> employeesList;
+    Person* employeesList[MAX_PERSONS];
 
+    int employeesCount;
     /**
      * @brief The next Id to be allocated to a task
      */
