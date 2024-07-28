@@ -33,8 +33,11 @@ private:
     int assignTaskId();
     void unassignTaskId();
 
-    Person& findOrCreateEmployee(string& employeeName);
-    Person& findEmployee(string& employeeName);
+    Person& findOrCreateEmployee(const string& employeeName);
+    Person* findEmployee(const string& employeeName);
+
+    bool filterByType(const Task& task, TaskType type);
+    bool filterByNotType(const Task& task, TaskType type);
 
 public:
     /**
