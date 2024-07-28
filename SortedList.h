@@ -3,21 +3,20 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace mtm {
-
-
-    
+namespace mtm
+{
 
     template <typename T>
-    struct node {
-        node<T>* prev;
-        node<T>* next;
-        T value;
+    struct node
+    {
+        node<T> *prev;
+        node<T> *next;
+        T *value;
     };
-    
 
     template <typename T>
-    class SortedList {
+    class SortedList
+    {
 
         /**
          *
@@ -43,204 +42,254 @@ namespace mtm {
          * 12. apply - returns a new list with elements that were modified by an operation
          */
 
-    public:
-        node<T>* head;
-        node<T>* tail;
-        
-        SortedList<T>() {
-            head = NULL;
-            tail = NULL;
+    private:
+        node<T> *head;
+        node<T> *tail;
+
+        // SHELLY - Add list clear method
+        void clear()
+        {
+            node<T> *currentNode = head;
+            while (currentNode != nullptr)
+            {
+                node<T> *nextNode = currentNode->next;
+                delete currentNode->value;
+                delete currentNode;
+                currentNode = nextNode;
+            }
+            head = tail = nullptr;
         }
 
-       class ConstIterator;
-       
-        void insert(T t) {
-            node<T>* newNode = new node<T>;
-            newNode->next = NULL;
-            newNode->prev = NULL;
-            newNode->value = t;
-            
-            node<T>* currNode = head;
-            node<T>* currPrev = NULL;
-            while(currNode && currNode->value < t) {
-                    currPrev = currNode;
-                    currNode = currNode->next;
+    public:
+        SortedList<T>()
+        {
+            head = nullptr;
+            tail = nullptr;
+        }
+
+        class ConstIterator;
+
+        // SHELLY - Apply this supports pointers
+        SortedList<T>& insert(T& valueToInsert)
+        {
+            node<T> *newNode = new node<T>;
+            newNode->next = nullptr;
+            newNode->prev = nullptr;
+            newNode->value = new T(valueToInsert);
+
+            node<T> *currentNode = head;
+            node<T> *currentPrev = nullptr;
+
+            // TODO - SHELLY - Check this makes sense
+            while (currentNode && currentNode->value > valueToInsert)
+            {
+                currentPrev = currentNode;
+                currentNode = currentNode->next;
             }
-            if(currPrev) {
-                currPrev->next = newNode;
-                newNode->prev = currPrev;
+            if (currentPrev)
+            {
+                currentPrev->next = newNode;
+                newNode->prev = currentPrev;
             }
-            if(currNode) {
-                newNode->next = currNode;
-                currNode->prev = newNode;
+            if (currentNode)
+            {
+                newNode->next = currentNode;
+                currentNode->prev = newNode;
             }
-            if(newNode->prev == NULL) {
+            if (newNode->prev == nullptr)
+            {
                 head = newNode;
             }
-            if(newNode->next == NULL) {
+            if (newNode->next == nullptr)
+            {
                 tail = newNode;
             }
+
+            return *this;
         }
 
-        ConstIterator begin() const {
-            return ConstIterator(this,head);
+        ConstIterator begin() const
+        {
+            return ConstIterator(this, head);
         }
 
-        ConstIterator end() const {
-            return ConstIterator(this,NULL);
+        ConstIterator end() const
+        {
+            return ConstIterator(this, nullptr);
         }
 
-        void remove(ConstIterator& i) {
-            if(i.currNode == NULL) {
+        SortedList<T>& remove(ConstIterator& iteratorToRemoveFrom)
+        {
+            if (iteratorToRemoveFrom.currentNode == nullptr)
+            {
                 return;
             }
 
-            const node<T>* curr = i.currNode;
-            node<T>* prev = i.currNode->prev;
-            node<T>* next = i.currNode->next;
-            
-            if(prev != NULL) {
+            const node<T> *nodeToRemove = iteratorToRemoveFrom.currentNode;
+            node<T> *prev = iteratorToRemoveFrom.currentNode->prev;
+            node<T> *next = iteratorToRemoveFrom.currentNode->next;
+
+            if (prev != nullptr)
+            {
                 prev->next = next;
             }
-            if(next != NULL) {
+            if (next != nullptr)
+            {
                 next->prev = prev;
             }
-            if(next != NULL && next->prev == NULL) {
+            if (next != nullptr && next->prev == nullptr)
+            {
                 this->head = next;
             }
-            if(next != NULL && next->next == NULL) {
+            if (next != nullptr && next->next == nullptr)
+            {
                 this->tail = next;
             }
-            if(prev != NULL && prev->prev == NULL) {
+            if (prev != nullptr && prev->prev == nullptr)
+            {
                 this->head = prev;
             }
-            if(prev != NULL && prev->next == NULL) {
+            if (prev != nullptr && prev->next == nullptr)
+            {
                 this->tail = prev;
             }
-            if(prev == NULL && next == NULL) {
-                this->head = NULL;
-                this->tail = NULL;
+            if (prev == nullptr && next == nullptr)
+            {
+                this->head = nullptr;
+                this->tail = nullptr;
             }
-            delete curr;
-            i.currNode = NULL;
-            return;
+            delete nodeToRemove;
+            iteratorToRemoveFrom.currentNode = nullptr;
+            return *this;
         }
 
-        int length() {
+        int length()
+        {
             int result = 0;
-            for(ConstIterator it = this->begin(); it != this->end() ; ++it) {
+            // SHELLY - Use cleaner iterartion
+            for (T& currentValue : *this)
+            {
                 result++;
             }
+
             return result;
         }
 
-        SortedList<T>(const SortedList& s) : head(NULL), tail(NULL) {
-            for(ConstIterator it = s.begin(); it != s.end() ; ++it) {
-                this->insert(*it);
+        SortedList<T>(const SortedList &listToCopy) : head(nullptr), tail(nullptr)
+        {
+            for (T &currentNode : *listToCopy)
+            {
+                this->insert(currentNode);
             }
         }
 
-
-        SortedList<T>& operator=(const SortedList& s) {
-            if(this == &s) {
+        //SHELLY - Rewrite
+        SortedList<T>& operator=(const SortedList &listToAssign)
+        {
+            if (this == &listToAssign)
+            {
                 return *this;
             }
-            ConstIterator it = this->begin();
-            ConstIterator temp;
-            while(it != this->end())
+
+            try
             {
-                temp = it;
-                ++it;
-                this->remove(temp);
+                SortedList<T> newListToAssign = new SortedList<T>(listToAssign);
+                clear();
+                this = newListToAssign;
             }
-            it = s.begin();
-            while(it != s.end())
+            catch (...)
             {
-                this->insert(it.currNode->value);
-                ++it;
+                // DAVID - Handle Exceptions
             }
             return *this;
         }
 
-
-        ~SortedList() {
-            ConstIterator it = this->begin();
-            ConstIterator temp;
-            while(it != this->end())
-            {
-                temp = it;
-                ++it;
-                this->remove(temp);
-            }
+        // SHELLY - Rewrite
+        ~SortedList()
+        {
+            clear();
         }
 
-        SortedList<T>& filter(bool (*func)(T)) {
+        SortedList<T> &filter(bool (*filterFunction)(T))
+        {
             SortedList<T> *newList = new SortedList<T>;
-            for(ConstIterator it = this->begin(); it != this->end() ; ++it) {
-                if(func(*it)) {
-                    newList->insert(*it);
+
+            // SHELLY - Change to cleaner iteration
+            for (T &currentValue : *this)
+            {
+                if (filterFunction(currentValue))
+                {
+                    newList->insert(&currentValue);
                 }
             }
+
             return *newList;
         }
 
-        SortedList<T>& apply(T (*func)(T)) {
+        SortedList<T> &apply(T (*applyFunction)(T))
+        {
             SortedList<T> *newList = new SortedList<T>;
-            for(ConstIterator it = this->begin(); it != this->end() ; ++it) {
-                newList->insert(func(*it));
+
+            // SHELLY - Change to cleaner iteration
+            for (T &currentValue : *this)
+            {
+                newList->insert(applyFunction(currentValue));
             }
+
             return *newList;
         }
     };
 
     template <class T>
-    class SortedList<T>::ConstIterator {
+    class SortedList<T>::ConstIterator
+    {
 
         /**
-     * the class should support the following public interface:
-     * if needed, use =defualt / =delete
-     *
-     * constructors and destructor:
-     * 1. a ctor(or ctors) your implementation needs
-     * 2. copy constructor
-     * 3. operator= - assignment operator
-     * 4. ~ConstIterator() - destructor
-     *
-     * operators:
-     * 5. operator* - returns the element the iterator points to
-     * 6. operator++ - advances the iterator to the next element
-     * 7. operator!= - returns true if the iterator points to a different element
-     *
-     */
+         * the class should support the following public interface:
+         * if needed, use =defualt / =delete
+         *
+         * constructors and destructor:
+         * 1. a ctor(or ctors) your implementation needs
+         * 2. copy constructor
+         * 3. operator= - assignment operator
+         * 4. ~ConstIterator() - destructor
+         *
+         * operators:
+         * 5. operator* - returns the element the iterator points to
+         * 6. operator++ - advances the iterator to the next element
+         * 7. operator!= - returns true if the iterator points to a different element
+         *
+         */
+
+    private:
+        const SortedList<T> *list;
+        const node<T> *currentNode;
+
+        ConstIterator() : list(nullptr), currentNode(nullptr) {}
+        ConstIterator(const SortedList<T> *list, const node<T> *currentNode) : list(list), currentNode(currentNode) {}
+        ~ConstIterator() = default;
+        ConstIterator(const ConstIterator &) = default;
 
     public:
-        const SortedList<T>* list;
-        const node<T>* currNode;
-        ConstIterator() : list(NULL), currNode(NULL) {}
-        ConstIterator(const SortedList<T>* list, const node<T>* currNode) : list(list), currNode(currNode) {}
-        ~ConstIterator()=default;
-        ConstIterator(const ConstIterator&)=default;
-        ConstIterator& operator=(const ConstIterator&)=default;
-        ConstIterator& operator++() {
-            currNode = currNode->next;
+        ConstIterator &operator=(const ConstIterator &) = default;
+
+        ConstIterator &operator++()
+        {
+            currentNode = currentNode->next;
             return *this;
         }
-        bool operator!=(const ConstIterator& other) {
-            if(this->currNode != NULL && other.currNode != NULL) {
-                return (this->currNode->value != other.currNode->value);
-            }
-            if(this->currNode == NULL && other.currNode == NULL) {
-                return false;
-            }
-            return true;
 
+        // SHELLY - Fix this to check of the iterator points to the same cell and not if it contains the same value.
+        bool operator!=(const ConstIterator &other)
+        {
+            return (this->currentNode != other.currentNode);
         }
-        const T& operator*() const {
-            return this->currNode->value;
+
+        const T &operator*() const
+        {
+            return this->currentNode->value;
         }
 
         friend SortedList<T>;
-    
     };
 }
-
